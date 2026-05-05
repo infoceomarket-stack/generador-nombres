@@ -1,61 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Generador de Nombres — CEO Market</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0a0a0a; --surface: #111111; --surface2: #1a1a1a;
+  --border: rgba(255,255,255,0.08); --border-hover: rgba(255,255,255,0.16);
+  --text: #f0ede8; --text-muted: #888580; --text-dim: #444;
+  --accent: #c8f060; --accent-dark: #a8d040; --danger: #ff5c5c; --success: #4cde8a;
+  --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.6; min-height: 100vh; }
+nav { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(10,10,10,0.92); backdrop-filter: blur(12px); z-index: 100; }
+.logo { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--text); text-decoration: none; letter-spacing: -0.02em; }
+.logo span { color: var(--accent); }
+nav a.back { font-size: 13px; color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+nav a.back:hover { color: var(--text); }
+.hero { max-width: 720px; margin: 0 auto; padding: 4rem 2rem 2rem; text-align: center; }
+.hero-badge { display: inline-block; font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); background: rgba(200,240,96,0.1); border: 1px solid rgba(200,240,96,0.2); padding: 4px 14px; border-radius: 999px; margin-bottom: 1.25rem; }
+.hero h1 { font-family: var(--font-display); font-size: clamp(32px, 6vw, 52px); font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 1rem; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero p { font-size: 16px; color: var(--text-muted); max-width: 480px; margin: 0 auto 2.5rem; font-weight: 300; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; max-width: 720px; margin: 0 auto 2rem; }
+.field-label { font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; display: block; }
+textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; color: var(--text); font-family: var(--font-body); font-size: 15px; resize: none; height: 90px; transition: border-color 0.2s; outline: none; }
+textarea::placeholder { color: var(--text-dim); }
+textarea:focus { border-color: var(--border-hover); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; color: var(--text); font-family: var(--font-body); font-size: 14px; outline: none; cursor: pointer; appearance: none; }
+select option { background: #1a1a1a; }
+.tags-wrap { margin-top: 12px; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.tag { font-size: 13px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; transition: all 0.15s; user-select: none; background: transparent; font-family: var(--font-body); }
+.tag:hover { border-color: var(--border-hover); color: var(--text); }
+.tag.active { background: rgba(200,240,96,0.1); border-color: rgba(200,240,96,0.35); color: var(--accent); }
+.btn-gen { width: 100%; margin-top: 1.5rem; padding: 14px; background: var(--accent); color: #0a0a0a; font-family: var(--font-display); font-size: 15px; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+.btn-gen:hover { background: var(--accent-dark); }
+.btn-gen:disabled { opacity: 0.4; cursor: not-allowed; }
+.section-title { font-family: var(--font-display); font-size: 13px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); max-width: 720px; margin: 0 auto 1rem; padding: 0 2rem; }
+.names-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; max-width: 720px; margin: 0 auto 2rem; padding: 0 2rem; }
+.name-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+.name-card:hover { border-color: rgba(200,240,96,0.3); }
+.name-card.selected { border-color: rgba(200,240,96,0.5); background: rgba(200,240,96,0.05); }
+.name-card .n { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.name-card .d { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+.btn-check { display: block; width: 100%; padding: 7px 0; background: transparent; border: 1px solid var(--border-hover); border-radius: 8px; color: var(--text-muted); font-family: var(--font-body); font-size: 12px; cursor: pointer; transition: all 0.15s; text-align: center; }
+.btn-check:hover { border-color: var(--accent); color: var(--accent); }
+.domain-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 1.5rem 2rem; max-width: 720px; margin: 0 auto 2rem; }
+.domain-card h3 { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 0.75rem; }
+.slug-edit-row { display: flex; gap: 8px; margin-bottom: 1rem; }
+.slug-edit-row input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: 14px; outline: none; font-family: var(--font-body); }
+.slug-edit-row input:focus { border-color: var(--border-hover); }
+.btn-reverify { padding: 8px 16px; background: var(--accent); color: #0a0a0a; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; font-family: var(--font-display); white-space: nowrap; }
+.btn-reverify:hover { background: var(--accent-dark); }
+.domain-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.domain-row:last-child { border-bottom: none; }
+.domain-name { font-size: 15px; font-weight: 500; color: var(--text); }
+.domain-right { display: flex; align-items: center; gap: 10px; }
+.badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 999px; }
+.badge-avail { background: rgba(76,222,138,0.12); color: var(--success); border: 1px solid rgba(76,222,138,0.2); }
+.badge-taken { background: rgba(255,92,92,0.1); color: var(--danger); border: 1px solid rgba(255,92,92,0.15); }
+.badge-loading { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+.btn-buy { font-size: 12px; font-weight: 500; padding: 6px 14px; background: var(--accent); color: #0a0a0a; border: none; border-radius: 8px; cursor: pointer; text-decoration: none; display: inline-block; font-family: var(--font-body); }
+.btn-buy:hover { background: var(--accent-dark); }
+.status { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 14px; }
+.error { text-align: center; padding: 1rem 2rem; color: var(--danger); font-size: 13px; }
+footer { text-align: center; padding: 2rem; color: var(--text-dim); font-size: 12px; border-top: 1px solid var(--border); margin-top: 3rem; }
+footer a { color: var(--text-muted); text-decoration: none; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.fade-up { animation: fadeUp 0.4s ease forwards; }
+@media (max-width: 600px) {
+  .hero { padding: 2.5rem 1.25rem 1.5rem; }
+  .card { padding: 1.25rem; margin: 0 1rem 1.5rem; }
+  .row2 { grid-template-columns: 1fr; }
+  .names-grid { padding: 0 1rem; }
+  .domain-card { margin: 0 1rem 1.5rem; padding: 1.25rem; }
+  nav { padding: 1rem 1.25rem; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="https://ceomarket.com">CEO<span>Market</span></a>
+  <a class="back" href="https://ceomarket.com">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Volver al sitio
+  </a>
+</nav>
+<div class="hero">
+  <div class="hero-badge">Herramienta gratuita</div>
+  <h1>El nombre perfecto para<br/><em>tu tienda online</em></h1>
+  <p>Describe tu negocio y la IA genera nombres creativos. Verifica disponibilidad de dominios al instante con GoDaddy.</p>
+</div>
+<div class="card">
+  <label class="field-label" for="desc">Que vende tu tienda?</label>
+  <textarea id="desc" placeholder="Ej: vendo accesorios para mascotas, especialmente perros pequenos, con disenos modernos y divertidos..."></textarea>
+  <div class="row2">
+    <div>
+      <label class="field-label" for="lang">Idioma de los nombres</label>
+      <select id="lang">
+        <option value="ambos">Espanol + English</option>
+        <option value="es">Solo espanol</option>
+        <option value="en">English only</option>
+      </select>
+    </div>
+    <div>
+      <label class="field-label" for="qty">Cantidad de sugerencias</label>
+      <select id="qty">
+        <option value="6">6 nombres</option>
+        <option value="9">9 nombres</option>
+        <option value="12">12 nombres</option>
+      </select>
+    </div>
+  </div>
+  <div class="tags-wrap">
+    <label class="field-label">Estilo del nombre</label>
+    <div class="tags" id="tags">
+      <button class="tag active" data-tag="moderno">Moderno</button>
+      <button class="tag active" data-tag="creativo">Creativo</button>
+      <button class="tag" data-tag="minimalista">Minimalista</button>
+      <button class="tag" data-tag="lujoso">Lujoso</button>
+      <button class="tag" data-tag="divertido">Divertido</button>
+      <button class="tag" data-tag="profesional">Profesional</button>
+      <button class="tag" data-tag="memorable">Memorable</button>
+      <button class="tag" data-tag="corto">Corto</button>
+    </div>
+  </div>
+  <button class="btn-gen" id="btnGen" onclick="generateNames()">Generar nombres con IA</button>
+  <div id="errorMsg" class="error" style="display:none;"></div>
+</div>
+<div id="statusWrap" style="display:none;"><div class="status" id="statusMsg"></div></div>
+<div id="namesSection" style="display:none;">
+  <div class="section-title">Nombres sugeridos - haz clic para verificar dominios</div>
+  <div class="names-grid" id="namesGrid"></div>
+</div>
+<div id="domainSection" style="display:none;">
+  <div class="domain-card">
+    <h3 id="domainTitle">Disponibilidad de dominios</h3>
+    <div class="slug-edit-row">
+      <input type="text" id="slugEdit" placeholder="Edita el nombre del dominio..." />
+      <button class="btn-reverify" onclick="reverificar()">Verificar otro</button>
+    </div>
+    <div id="domainList"></div>
+  </div>
+</div>
+<footer>Hecho con IA · <a href="https://ceomarket.com">CEO Market</a> · Precios de dominio referenciales, verificar en GoDaddy</footer>
+<script>
+const BACKEND = 'https://domain-checker-api-gamma.vercel.app/api/check-domain';
+const NOMBRES_API = 'https://domain-checker-api-gamma.vercel.app/api/generate-nombres';
+document.querySelectorAll('.tag').forEach(t => { t.addEventListener('click', () => t.classList.toggle('active')); });
+async function generateNames() {
+  const desc = document.getElementById('desc').value.trim();
+  if (!desc) { showError('Por favor describe tu tienda antes de continuar.'); return; }
+  const lang = document.getElementById('lang').value;
+  const qty = document.getElementById('qty').value;
+  const tags = [...document.querySelectorAll('.tag.active')].map(t => t.dataset.tag).join(', ') || 'creativo, moderno';
+  const btn = document.getElementById('btnGen');
+  btn.disabled = true; btn.textContent = 'Generando...';
+  hideError();
+  document.getElementById('namesSection').style.display = 'none';
+  document.getElementById('domainSection').style.display = 'none';
+  showStatus('La IA esta pensando nombres creativos para tu tienda...');
+  try {
+    const res = await fetch(NOMBRES_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ desc, lang, qty, tags })
+    });
+    const names = await res.json();
+    if (!Array.isArray(names)) throw new Error('invalid');
+    hideStatus();
+    renderNames(names);
+  } catch(e) {
+    hideStatus();
+    showError('Hubo un error generando los nombres. Intentalo de nuevo.');
+  }
+  btn.disabled = false; btn.textContent = 'Generar nombres con IA';
+}
+function renderNames(names) {
+  const grid = document.getElementById('namesGrid');
+  grid.innerHTML = '';
+  names.forEach((n, i) => {
+    const card = document.createElement('div');
+    card.className = 'name-card fade-up';
+    card.style.animationDelay = i * 0.05 + 's';
+    card.innerHTML = '<div class="n">' + n.name + '</div><div class="d">' + n.desc + '</div><button class="btn-check" onclick="checkDomains(\'' + n.slug + '\',\'' + n.name + '\',this)">Verificar dominio</button>';
+    grid.appendChild(card);
+  });
+  document.getElementById('namesSection').style.display = 'block';
+  document.getElementById('namesSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 async function checkDomains(slug, name, btn) {
   document.querySelectorAll('.name-card').forEach(c => c.classList.remove('selected'));
   btn.closest('.name-card').classList.add('selected');
-  const section = document.getElementById('domainSection');
-  const list = document.getElementById('domainList');
-  document.getElementById('domainTitle').textContent = `Dominios para "${name}"`;
-
-  const tlds = ['.com','.store','.shop','.co','.net'];
-  list.innerHTML = `
-    <div style="display:flex;gap:8px;margin-bottom:1rem;">
-      <input type="text" id="slugEdit" value="${slug}" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:14px;outline:none;" placeholder="Edita el nombre del dominio..." />
-      <button onclick="reverificar()" style="padding:8px 16px;background:var(--accent);color:#0a0a0a;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;">Verificar</button>
-    </div>
-    ${tlds.map(t => `<div class="domain-row" id="dr-${slug}${t.replace('.','')}"><span class="domain-name">${slug}${t}</span><div class="domain-right"><span class="badge badge-loading">Verificando...</span></div></div>`).join('')}
-  `;
-
-  section.style.display = 'block';
-  section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  document.getElementById('domainTitle').textContent = 'Dominios para "' + name + '"';
+  document.getElementById('slugEdit').value = slug;
+  document.getElementById('domainSection').style.display = 'block';
+  document.getElementById('domainSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   await verificarSlug(slug);
 }
-
 async function reverificar() {
   const newSlug = document.getElementById('slugEdit').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
   if (!newSlug) return;
   document.getElementById('slugEdit').value = newSlug;
-  const tlds = ['.com','.store','.shop','.co','.net'];
-  const list = document.getElementById('domainList');
-  const input = document.getElementById('slugEdit');
-  const btn = input.nextElementSibling;
-
-  const rows = tlds.map(t => `<div class="domain-row" id="dr-${newSlug}${t.replace('.','')}"><span class="domain-name">${newSlug}${t}</span><div class="domain-right"><span class="badge badge-loading">Verificando...</span></div></div>`).join('');
-  list.innerHTML = `<div style="display:flex;gap:8px;margin-bottom:1rem;"><input type="text" id="slugEdit" value="${newSlug}" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:14px;outline:none;" /><button onclick="reverificar()" style="padding:8px 16px;background:var(--accent);color:#0a0a0a;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;">Verificar</button></div>${rows}`;
   await verificarSlug(newSlug);
 }
-
 async function verificarSlug(slug) {
-  const tlds = ['.com','.store','.shop','.co','.net'];
+  const tlds = ['.com', '.store', '.shop', '.co', '.net'];
+  const list = document.getElementById('domainList');
+  list.innerHTML = tlds.map(t => '<div class="domain-row" id="dr-' + slug + t.replace('.','') + '"><span class="domain-name">' + slug + t + '</span><div class="domain-right"><span class="badge badge-loading">Verificando...</span></div></div>').join('');
   try {
-    const res = await fetch(`${BACKEND}?domain=${slug}`);
+    const res = await fetch(BACKEND + '?domain=' + slug);
     const data = await res.json();
     const domains = data.domains || (Array.isArray(data) ? data : []);
     domains.forEach(d => {
       const tld = d.domain.replace(slug, '');
-      const row = document.getElementById(`dr-${slug}${tld.replace('.','')}`);
+      const row = document.getElementById('dr-' + slug + tld.replace('.',''));
       if (!row) return;
       const right = row.querySelector('.domain-right');
       if (d.available) {
-        const price = d.price ? ` · $${Math.round(d.price/1000000)}/año` : '';
-        right.innerHTML = `<span class="badge badge-avail">Disponible${price}</span><a class="btn-buy" href="https://www.godaddy.com/domainsearch/find?domainToCheck=${d.domain}" target="_blank">Comprar en GoDaddy</a>`;
+        const price = d.price ? ' · $' + Math.round(d.price / 1000000) + '/ano' : '';
+        right.innerHTML = '<span class="badge badge-avail">Disponible' + price + '</span><a class="btn-buy" href="https://www.godaddy.com/domainsearch/find?domainToCheck=' + d.domain + '" target="_blank">Comprar en GoDaddy</a>';
       } else {
-        right.innerHTML = `<span class="badge badge-taken">No disponible</span>`;
+        right.innerHTML = '<span class="badge badge-taken">No disponible</span>';
       }
     });
-    if (domains.length === 0) tlds.forEach(t => {
-      const row = document.getElementById(`dr-${slug}${t.replace('.','')}`)
-      if (row) row.querySelector('.domain-right').innerHTML = `<span class="badge badge-taken">Sin resultado</span>`;
-    });
+    if (domains.length === 0) list.innerHTML = '<div class="status">No se obtuvieron resultados.</div>';
   } catch(e) {
-    document.getElementById('domainList').innerHTML += '<div class="error">No se pudo conectar. Verifica tu backend.</div>';
+    list.innerHTML = '<div class="error">No se pudo conectar con GoDaddy.</div>';
   }
 }
+function showStatus(msg) { document.getElementById('statusMsg').textContent = msg; document.getElementById('statusWrap').style.display = 'block'; }
+function hideStatus() { document.getElementById('statusWrap').style.display = 'none'; }
+function showError(msg) { const el = document.getElementById('errorMsg'); el.textContent = msg; el.style.display = 'block'; }
+function hideError() { document.getElementById('errorMsg').style.display = 'none'; }
+</script>
+</body>
+</html>
