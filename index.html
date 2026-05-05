@@ -153,13 +153,13 @@ async function generateNames() {
   const langInstr = lang === 'es' ? 'Genera todos los nombres en español.' : lang === 'en' ? 'Generate all names in English.' : 'Mix Spanish and English names creatively.';
   const prompt = `Genera exactamente ${qty} nombres únicos y creativos para una tienda de e-commerce.\nDescripción del negocio: "${desc}"\nEstilo deseado: ${tags}\n${langInstr}\nReglas: nombres originales, slug solo letras minúsculas sin espacios ni tildes, descripción máximo 7 palabras.\nResponde SOLO con JSON array sin texto adicional ni backticks:\n[{"name":"NombreTienda","desc":"razón breve","slug":"slug"}]`;
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+    const res = await fetch('https://domain-checker-api-gamma.vercel.app/api/generate-nombres', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ desc, lang, qty, tags })
     });
-    const data = await res.json();
-    const raw = data.content.map(c => c.text || '').join('').replace(/```json|```/g, '').trim();
-    const names = JSON.parse(raw);
+    const names = await res.json();
+    if (!Array.isArray(names)) throw new Error('invalid');
     hideStatus(); renderNames(names);
   } catch(e) { hideStatus(); showError('Hubo un error generando los nombres. Inténtalo de nuevo.'); }
   btn.disabled = false; btn.textContent = 'Generar nombres con IA';
